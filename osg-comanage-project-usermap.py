@@ -69,7 +69,7 @@ def getpw(user, passfd, passfile):
 
 def mkauthstr(user, passwd):
     from base64 import encodebytes
-    raw_authstr = '%s:%s' % (user, passwd)
+    raw_authstr = f'{user}:{passwd}'
     return encodebytes(raw_authstr.encode()).decode().replace('\n', '')
 
 
@@ -78,7 +78,7 @@ def mkrequest(target, **kw):
     if kw:
         url += "?" + "&".join( "{}={}".format(k,v) for k,v in kw.items() )
     req = urllib.request.Request(url)
-    req.add_header("Authorization", "Basic %s" % options.authstr)
+    req.add_header("Authorization", f"Basic {options.authstr}")
     req.get_method = lambda: 'GET'
     return req
 
@@ -157,7 +157,7 @@ def parse_options(args):
         usage()
 
     if args:
-        usage("Extra arguments: %s" % repr(args))
+        usage(f"Extra arguments: {repr(args)}")
 
     passfd = None
     passfile = None

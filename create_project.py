@@ -79,7 +79,7 @@ def getpw(user, passfd, passfile):
 
 def mkauthstr(user, passwd):
     from base64 import encodebytes
-    raw_authstr = '%s:%s' % (user, passwd)
+    raw_authstr = f'{user}:{passwd}'
     return encodebytes(raw_authstr.encode()).decode().replace('\n', '')
 
 
@@ -96,7 +96,7 @@ def mkrequest3(method, target, data, **kw):
     if kw:
         url += "?" + "&".join( "{}={}".format(k,v) for k,v in kw.items() )
     req = urllib.request.Request(url, json.dumps(data).encode("utf-8"))
-    req.add_header("Authorization", "Basic %s" % options.authstr)
+    req.add_header("Authorization", f"Basic {options.authstr}")
     req.add_header("Content-Type", "application/json")
     req.get_method = lambda: method
     return req
@@ -137,16 +137,16 @@ def get_co_person_identifiers(pid):
 
 
 def get_co_group(gid):
-    grouplist = call_api("co_groups/%s.json" % gid) | get_datalist("CoGroups")
+    grouplist = call_api(f"co_groups/{gid}.json") | get_datalist("CoGroups")
     if not grouplist:
-        raise RuntimeError("No such CO Group Id: %s" % gid)
+        raise RuntimeError(f"No such CO Group Id: {gid}")
     return grouplist[0]
 
 
 def get_identifier(id_):
-    idfs = call_api("identifiers/%s.json" % id_) | get_datalist("Identifiers")
+    idfs = call_api(f"identifiers/{id_}.json") | get_datalist("Identifiers")
     if not idfs:
-        raise RuntimeError("No such Identifier Id: %s" % id_)
+        raise RuntimeError(f"No such Identifier Id: {id_}")
     return idfs[0]
 
 
@@ -168,7 +168,7 @@ def get_datalist(listname):
 # script-specific functions
 
 def add_project_identifier_to_group(gid, project_name):
-    identifier_name = "Yes-%s" % project_name
+    identifier_name = f"Yes-{project_name}"
     type_ = "ospoolproject"
     return add_identifier_to_group(gid, type_, identifier_name)
 
@@ -195,9 +195,9 @@ def gname_to_gid(gname):
     matching = [ g for g in groups if g["Name"] == gname ]
 
     if len(matching) > 1:
-        raise RuntimeError("Multiple groups found with Name '%s'" % gname)
+        raise RuntimeError(f"Multiple groups found with Name '{gname}'")
     elif not matching:
-        raise RuntimeError("No group found with Name '%s'" % gname)
+        raise RuntimeError(f"No group found with Name '{gname}'")
 
     group = matching[0]
     return group["Id"]
@@ -245,9 +245,8 @@ def main(args):
     else:
         options.gname = get_co_group(options.gid)["Name"]
 
-    print('Creating new Identifier for project "%s"\n'
-          'for CO Group "%s" (%s)'
-          % (options.project, options.gname, options.gid))
+    print(f'Creating new Identifier for project "{options.project}"\n'
+          f'for CO Group "{options.gname}" ({options.gid})')
     print("")
 
     resp = add_project_identifier_to_group(options.gid, options.project)

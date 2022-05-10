@@ -87,7 +87,7 @@ def getpw(user, passfd, passfile):
 
 def mkauthstr(user, passwd):
     from base64 import encodebytes
-    raw_authstr = '%s:%s' % (user, passwd)
+    raw_authstr = f'{user}:{passwd}'
     return encodebytes(raw_authstr.encode()).decode().replace('\n', '')
 
 
@@ -104,7 +104,7 @@ def mkrequest3(method, target, data, **kw):
     if kw:
         url += "?" + "&".join( "{}={}".format(k,v) for k,v in kw.items() )
     req = urllib.request.Request(url, json.dumps(data).encode("utf-8"))
-    req.add_header("Authorization", "Basic %s" % options.authstr)
+    req.add_header("Authorization", f"Basic {options.authstr}")
     req.add_header("Content-Type", "application/json")
     req.get_method = lambda: method
     return req
@@ -145,9 +145,9 @@ def get_co_person_identifiers(pid):
 
 
 def get_co_group(gid):
-    grouplist = call_api("co_groups/%s.json" % gid) | get_datalist("CoGroups")
+    grouplist = call_api(f"co_groups/{gid}.json") | get_datalist("CoGroups")
     if not grouplist:
-        raise RuntimeError("No such CO Group Id: %s" % gid)
+        raise RuntimeError(f"No such CO Group Id: {gid}")
     return grouplist[0]
 
 
@@ -215,7 +215,7 @@ def show_misnamed_unixcluster_group(group):
     oldname = group["Name"]
     newname = get_fixed_unixcluster_group_name(oldname)
     if oldname != newname:
-        print('  ** Rename group to: "%s"' % newname)
+        print(f'  ** Rename group to: "{newname}"')
     show_group_identifiers(group["Id"])
     print("")
 
@@ -244,7 +244,8 @@ def show_group_identifiers(gid):
 
     ids_to_delete = get_identifiers_to_delete(identifiers)
     if ids_to_delete:
-        print('  ** Identifier Ids to delete: %s' % ', '.join(ids_to_delete))
+        idlist = ', '.join(ids_to_delete)
+        print(f'  ** Identifier Ids to delete: {idlist}')
 
 
 
@@ -252,7 +253,7 @@ def show_group_identifiers(gid):
 
 
 def delete_identifier(id_):
-    return call_api2(DELETE, "identifiers/%s.json" % id_)
+    return call_api2(DELETE, f"identifiers/{id_}.json")
 
 
 def rename_co_group(gid, group, newname):
@@ -268,7 +269,7 @@ def rename_co_group(gid, group, newname):
         "RequestType" : "CoGroups",
         "Version"     : "1.0"
     }
-    return call_api3(PUT, "co_groups/%s.json" % gid, data)
+    return call_api3(PUT, f"co_groups/{gid}.json", data)
 
 
 def fixup_unixcluster_group(gid):
@@ -305,7 +306,7 @@ def parse_options(args):
         usage()
 
     if args:
-        usage("Extra arguments: %s" % repr(args))
+        usage(f"Extra arguments: {repr(args)}")
 
     passfd = None
     passfile = None
